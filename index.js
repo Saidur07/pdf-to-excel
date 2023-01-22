@@ -1,8 +1,6 @@
 const express = require("express");
 const fileUpload = require("express-fileupload");
-const pdfTableExtractor = require("pdf-table-extractor");
-const excel = require("exceljs");
-
+const exec = require("child_process").exec;
 const app = express();
 app.use(express.json());
 app.use(
@@ -23,35 +21,31 @@ app.post("/upload", (req, res) => {
   if (!req.files) {
     return res.status(400).send({ error: "No files were uploaded." });
   }
-
   let pdfFile = req.files.pdfFile;
   let fileName = pdfFile.name.split(".")[0];
-
   pdfFile.mv(`/tmp/${fileName}.pdf`, (err) => {
     if (err) {
       return res.status(500).send({ error: err });
     }
-    pdfTableExtractor(`/tmp/${fileName}.pdf`, (err, tables) => {
+    exec(`pdftotext -layout /tmp/${fileName}.pdf -`, (err, stdout) => {
       if (err) {
         return res.status(500).send({ error: err });
       }
-      let workbook = new excel.Workbook();
-      let worksheet = workbook.addWorksheet("Sheet1");
-      tables.forEach((table) => {
-        let data = table.rows.map((row) => row.map((cell) => cell.text));
-        worksheet.addRows(data);
-      });
-      workbook.xlsx.writeFile(`/tmp/${fileName}.xlsx`).then(() => {
-        res.download(`/tmp/${fileName}.xlsx`, `${fileName}.xlsx`, (err) => {
-          if (err) {
-            return res.status(500).send({ error: err });
-          }
-        });
-      });
+      // parse the plain text here
+      res.setHeader(
+        "Content-Type",
+        "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+      );
+
+      // convert plain text to excel here
+      res.setHeader(
+        "Content-Disposition",
+        "attachment; filename=" + fileName + ".xlsx"
+      );
+      res.send(excelFile);
     });
   });
 });
-
 const port = 3000;
 app.listen(port, () => {
   console.log(`Server started on port ${port}`);
