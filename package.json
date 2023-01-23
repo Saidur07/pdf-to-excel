@@ -21,7 +21,6 @@
     "pdf-parse": "^1.1.1",
     "pdf-table-extractor": "^1.0.3",
     "pdf-to-excel": "^0.3.2",
-    "pdf2json": "^3.0.2",
     "tabula-js": "^1.0.1",
     "tesseract.js": "^4.0.2"
   }

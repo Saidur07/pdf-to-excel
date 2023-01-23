@@ -1,42 +1,39 @@
 <!DOCTYPE html>
 <html>
-
-<head>
+  <head>
     <title>PDF to Excel Conversion</title>
+  </head>
 
-</head>
-
-<body>
+  <body>
     <form onsubmit="handleUpload(event)">
-        <input type="file" id="file" name="pdfFile" accept=".pdf" required>
-        <input type="submit" value="Upload and Convert">
+      <input type="file" id="file" name="pdfFile" accept=".pdf" required />
+      <input type="submit" value="Upload and Convert" />
     </form>
-    <div id="result" style="display: none;"></div>
+    <div id="result" style="display: none"></div>
     <script>
-        function handleUpload(event) {
-            event.preventDefault();
-            const file = document.querySelector('#file').files[0];
-            const formData = new FormData();
-            formData.append('pdfFile', file);
-            fetch('http://localhost:3000/upload', {
-                method: 'POST',
-                body: formData
-            })
-                .then(response => response.json())
-                .then(data => {
-                    if (data.error) {
-                        alert(data.error);
-                    } else {
-                        const link = document.createElement('a');
-                        link.href = 'http://localhost:3000/download/' + data.fileName;
-                        link.innerHTML = 'Download Excel File';
-                        document.querySelector('#result').appendChild(link);
-                        document.querySelector('#result').style.display = 'block';
-                    }
-                })
-                .catch(error => console.error(error));
-        }
+      function handleUpload(event) {
+        event.preventDefault();
+        const file = document.querySelector("#file").files[0];
+        const formData = new FormData();
+        formData.append("pdfFile", file);
+        fetch("http://localhost:3000/upload", {
+          method: "POST",
+          body: formData,
+        })
+          .then((response) => response.json())
+          .then((data) => {
+            if (data.error) {
+              alert(data.error);
+            } else {
+              const link = document.createElement("a");
+              link.href = "http://localhost:3000/download/" + data.fileName;
+              link.innerHTML = "Download Excel File";
+              document.querySelector("#result").appendChild(link);
+              document.querySelector("#result").style.display = "block";
+            }
+          })
+          .catch((error) => console.error(error));
+      }
     </script>
-</body>
-
+  </body>
 </html>
