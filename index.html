@@ -2,36 +2,39 @@
 <html>
 
 <head>
-    <title>PDF to Excel Converter</title>
+    <title>PDF to Excel Conversion</title>
+
 </head>
 
 <body>
-    <form id="uploadForm" method="post" enctype="multipart/form-data">
-        <label for="pdfFile">Select PDF File:</label>
-        <input type="file" name="pdfFile" id="pdfFile">
-        <br>
-        <input type="button" value="Upload" onclick="uploadFile()">
+    <form onsubmit="handleUpload(event)">
+        <input type="file" id="file" name="pdfFile" accept=".pdf" required>
+        <input type="submit" value="Upload and Convert">
     </form>
-    <br>
-    <div id="uploadStatus"></div>
-    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <div id="result" style="display: none;"></div>
     <script>
-        function uploadFile() {
-            var formData = new FormData(document.getElementById("uploadForm"));
-            axios.post("http://localhost:3000/upload", formData, {
-                responseType: 'blob'
+        function handleUpload(event) {
+            event.preventDefault();
+            const file = document.querySelector('#file').files[0];
+            const formData = new FormData();
+            formData.append('pdfFile', file);
+            fetch('http://localhost:3000/upload', {
+                method: 'POST',
+                body: formData
             })
-                .then(response => {
-                    var blob = new Blob([response.data], { type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" });
-                    var link = document.createElement("a");
-                    link.href = window.URL.createObjectURL(blob);
-                    link.download = "converted.xlsx";
-                    link.click();
+                .then(response => response.json())
+                .then(data => {
+                    if (data.error) {
+                        alert(data.error);
+                    } else {
+                        const link = document.createElement('a');
+                        link.href = 'http://localhost:3000/download/' + data.fileName;
+                        link.innerHTML = 'Download Excel File';
+                        document.querySelector('#result').appendChild(link);
+                        document.querySelector('#result').style.display = 'block';
+                    }
                 })
-                .catch(error => {
-                    document.getElementById("uploadStatus").innerHTML = "Upload failed";
-                    console.log(error);
-                });
+                .catch(error => console.error(error));
         }
     </script>
 </body>
